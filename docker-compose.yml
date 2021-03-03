@@ -1,0 +1,73 @@
+version: "3.8"
+services:
+  db:
+    build:
+      context: ./db
+      dockerfile: Dockerfile
+    image: mahmoud-instance-mdillon/postgis:10-alpine
+    container_name: mahmoud-dhis-db
+    command:
+      - "-c"
+      - "max_connections=${max_connections}"
+      - "-c"
+      - "shared_buffers=${shared_buffers}"
+      - "-c"
+      - "effective_cache_size=${effective_cache_size}"
+      - "-c"
+      - "maintenance_work_mem=${maintenance_work_mem}"
+      - "-c"
+      - "checkpoint_completion_target=${checkpoint_completion_target}"
+      - "-c"
+      - "wal_buffers=${wal_buffers}"
+      - "-c"
+      - "default_statistics_target=${default_statistics_target}"
+      - "-c"
+      - "random_page_cost=${random_page_cost}"
+      - "-c"
+      - "effective_io_concurrency=${effective_io_concurrency}"
+      - "-c"
+      - "work_mem=${work_mem}"
+      - "-c"
+      - "min_wal_size=${min_wal_size}"
+      - "-c"
+      - "max_wal_size=${max_wal_size}"
+      - "-c"
+      - "max_worker_processes=${max_worker_processes}"
+      - "-c"
+      - "max_parallel_workers_per_gather=${max_parallel_workers_per_gather}"
+      - "-c"
+      - "max_parallel_workers=${max_parallel_workers}"
+      - "-c"
+      - "wal_writer_delay=${wal_writer_delay}"
+      - "-c"
+      - "max_locks_per_transaction=${max_locks_per_transaction}"
+      - "-c"
+      - "synchronous_commit=${synchronous_commit}"
+      - "-c"
+      - "ldap.url=${LDAP_URL}"
+      - "-c"
+      - "ldap.manager.dn=${LDAP_MANAGER_DN}"
+      - "-c"
+      - "ldap.manager.password=${LDAP_MANAGER_PASS}"
+      - "-c"
+      - "ldap.search.filter=${LDAP_SEARCH_FILTER}"
+    environment:
+      POSTGRES_USER: dhis
+      POSTGRES_DB: dhis2
+      POSTGRES_PASSWORD: dhis
+    volumes:
+      - type: volume
+        source: dhis_db_data
+        target: /var/lib/postgresql/data
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    image: mahmoud-instance-dhis2/core:2.33.0
+    container_name: mahmoud-dhis-web
+    ports:
+      - "7676:8000"
+    depends_on:
+      - db
+volumes:
+    dhis_db_data:
